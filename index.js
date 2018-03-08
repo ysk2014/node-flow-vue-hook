@@ -28,11 +28,6 @@ module.exports = class VueHook {
             });
         });
 
-        builder.on("devServer", (client)=> {
-            client.setDevServer(this.createDevtool(builder.options));
-        });
-
-
         builder.on("merge-loader", base => {
             loader.vue.options = this.vueLoader(base.config);
             base.mergeLoader(loader);
@@ -150,28 +145,5 @@ module.exports = class VueHook {
                 image: 'xlink:href'
             }
         }
-    }
-
-    createDevtool(config) {
-        let dev = config.dev;
-        return {
-            compress: true,
-            clientLogLevel: 'warning',
-            historyApiFallback: true,
-            hot: true,
-            inline: true,
-            host: dev.host,
-            port: dev.port,
-            overlay: dev.errorOverlay ? {
-                warnings: false,
-                errors: true,
-            } : false,
-            publicPath: dev.publicPath,
-            proxy: dev.proxyTable,
-            quiet: true, // necessary for FriendlyErrorsPlugin
-            watchOptions: {
-                poll: dev.poll
-            }
-        };
     }
 }
