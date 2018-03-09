@@ -21,8 +21,8 @@ module.exports = class VueHook {
                 fallback: "vue-style-loader"
             });
 
-            client.setExtensions(['.vue']);
-            client.setAlias({
+            base.setExtensions(['.vue']);
+            base.setAlias({
                 "@": path.resolve(builder.options.srcDir),
                 "vue$": "vue/dist/vue.esm.js"
             });
