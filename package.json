@@ -1,13 +1,13 @@
 {
   "name": "flow-vue-hook",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-    "type":"git",
+    "type": "git",
     "url": "git+https://github.com/ysk2014/flow-vue-hook.git"
   },
   "author": {
@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "extract-text-webpack-plugin": "^3.0.2",
-    "vue-loader": "^14.2.1"
+    "vue-loader": "^14.2.1",
+    "vue-style-loader": "^4.0.2"
   }
 }
