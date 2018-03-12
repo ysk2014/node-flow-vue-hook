@@ -4,15 +4,7 @@ let loader = require("./config/loader");
 
 module.exports = class VueHook {
     constructor(options = {}) {
-        let babelOptions = {
-            "presets": [
-                ["env", {
-                    "modules": false
-                }],
-                "stage-2"
-            ]
-        }
-        this.babelOptions = options.babel || babelOptions;
+        
     }
 
     apply(builder) {
@@ -39,36 +31,20 @@ module.exports = class VueHook {
 
         const cssLoader = {
             loader: 'css-loader',
-            options: {
+            options: Object.assign({}, {
                 sourceMap: options.sourceMap
-            }
+            }, options.loaderOptions.css)
         };
 
         var postcssLoader = {
             loader: 'postcss-loader',
-            options: {
-                useConfigFile: false,
-                sourceMap: options.sourceMap,
-                ident: 'postcss',
-                plugins: ()=> [
-                    require('postcss-flexbugs-fixes'),
-                    require('autoprefixer')({
-                        browsers: [
-                            '>1%',
-                            'last 4 versions',
-                            'Firefox ESR',
-                            'not ie < 9',
-                        ],
-                        flexbox: 'no-2009',
-                    }),
-                ],
-            }
+            options: options.loaderOptions.postcss
         }
         
         function generateLoaders (loader, loaderOptions) {
             const loaders = [cssLoader, postcssLoader];
 
-            if (options.extract && options.merge) {
+            if (options.extract && options.imerge) {
                 loaders.push({
                     loader: 'imerge-loader'
                 })
@@ -79,7 +55,7 @@ module.exports = class VueHook {
                     loader: loader + '-loader',
                     options: Object.assign({}, loaderOptions, {
                         sourceMap: options.sourceMap
-                    })
+                    }, options.loaderOptions[loader])
                 })
             }
         
@@ -105,38 +81,33 @@ module.exports = class VueHook {
         }
     }
 
-    vueLoader({ cssSourceMap, extract, fallback}) {
+    vueLoader({ cssSourceMap, extract, fallback, imerge, loaderOptions}) {
         let cssLoaders = this.cssLoaders({
             sourceMap: cssSourceMap,
             extract: extract,
-            fallback: fallback
+            fallback: fallback,
+            imerge: imerge,
+            loaderOptions: loaderOptions
         });
+
+        
+        let postcss = loaderOptions.postcss;
+        
+        if (typeof loaderOptions.postcss.plugins == "function") {
+            postcss = Object.assign({}, loaderOptions.postcss, {
+                plugins: loaderOptions.postcss.plugins()
+            })
+        }
 
         return {
             loaders:  Object.assign({}, {
                 js: {
                     loader: 'babel-loader',
-                    options: Object.assign({}, this.babelOptions)
+                    options: Object.assign({}, loaderOptions.babel)
                 }
             }, cssLoaders),
             cssSourceMap: cssSourceMap,
-            postcss: {
-                useConfigFile: false,
-                sourceMap: cssSourceMap,
-                ident: 'postcss',
-                plugins: [
-                    require('postcss-flexbugs-fixes'),
-                    require('autoprefixer')({
-                        browsers: [
-                            '>1%',
-                            'last 4 versions',
-                            'Firefox ESR',
-                            'not ie < 9',
-                        ],
-                        flexbox: 'no-2009',
-                    }),
-                ]
-            },
+            postcss: postcss,
             preserveWhitespace: false,
             transformToRequire: {
                 video: 'src',
