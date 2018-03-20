@@ -38,7 +38,9 @@ module.exports = class VueHook {
 
         var postcssLoader = {
             loader: 'postcss-loader',
-            options: options.loaderOptions.postcss
+            options: Object.assign({}, {
+                useConfigFile: false
+            }, options.loaderOptions.postcss)
         }
         
         function generateLoaders (loader, loaderOptions) {
@@ -95,6 +97,7 @@ module.exports = class VueHook {
         
         if (typeof loaderOptions.postcss.plugins == "function") {
             postcss = Object.assign({}, loaderOptions.postcss, {
+                useConfigFile: false,
                 plugins: loaderOptions.postcss.plugins()
             })
         }
