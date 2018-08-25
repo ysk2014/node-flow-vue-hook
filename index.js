@@ -3,7 +3,7 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const nodeExternals = require("webpack-node-externals");
 let PrerenderWebpackPlugin = require("./plugins/prerender-webpack-plugin");
 let rules = require("./config/rules");
-let plugins = require("./config/plugin");
+let plugins = require("./config/plugins");
 
 module.exports = class VueHook {
     constructor(options = {}) {
