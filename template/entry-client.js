@@ -71,4 +71,6 @@ if (router) {
         app.$mount(root.el || "#app");
         store && Vue.nextTick(() => (store.state.SSR_FETCHED = false));
     });
+} else {
+    app.$mount(root.el || "#app");
 }
