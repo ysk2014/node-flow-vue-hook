@@ -68,9 +68,21 @@ if (router) {
             .catch(next);
     });
     router.onReady(() => {
+        createID();
         app.$mount(root.el || "#app");
         store && Vue.nextTick(() => (store.state.SSR_FETCHED = false));
     });
 } else {
+    createID();
     app.$mount(root.el || "#app");
+}
+
+
+function createID() {
+    let id = root.el.split("#")[1];
+    if (document.getElementById(id)) return;
+
+    let el = document.createElement("div");
+    el.setAttribute("id", id);
+    document.body.appendChild(el);
 }
