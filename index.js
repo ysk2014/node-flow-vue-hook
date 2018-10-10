@@ -1,5 +1,4 @@
 const path = require("path");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const nodeExternals = require("webpack-node-externals");
 let PrerenderWebpackPlugin = require("./plugins/prerender-webpack-plugin");
 let rules = require("./config/rules");
@@ -67,7 +66,6 @@ module.exports = class VueHook {
         });
 
         builder.on("merge-rule", config => {
-            rules.vue.options = this.vueLoader(config.config);
             config.mergeRule(rules);
         });
 
@@ -90,6 +88,27 @@ module.exports = class VueHook {
             }
 
             config.set("entry", entry);
+
+            config.mergeOptimization({
+                splitChunks: {
+                    cacheGroups: {
+                        test: function(module) {
+                            // any required modules inside node_modules are extracted to vendor
+                            return (
+                                module.resource &&
+                                /\.js$/.test(module.resource) &&
+                                module.resource.indexOf(
+                                    path.join(process.cwd(), "./node_modules")
+                                ) === 0 &&
+                                !/node_modules[\/\\]{1}flow\-vue\-hook[\/\\]{1}template[\/\\]{1}/.test(
+                                    module.resource
+                                ) &&
+                                !/\.(css|less|scss|sass|styl|stylus|vue)$/.test(module.request)
+                            );
+                        }
+                    }
+                }
+            });
         });
 
         builder.on("merge-plugin", config => {
@@ -131,115 +150,5 @@ module.exports = class VueHook {
                 });
             });
         });
-    }
-
-    cssLoaders(options) {
-        options = options || {};
-
-        const cssLoader = {
-            loader: "css-loader",
-            options: Object.assign(
-                {},
-                {
-                    sourceMap: options.sourceMap
-                },
-                options.loaderOptions.css
-            )
-        };
-
-        var postcssLoader = {
-            loader: "postcss-loader",
-            options: Object.assign(
-                {},
-                {
-                    useConfigFile: false
-                },
-                options.loaderOptions.postcss
-            )
-        };
-
-        function generateLoaders(loader, loaderOptions) {
-            const loaders = [cssLoader, postcssLoader];
-
-            if (options.extract && options.imerge) {
-                loaders.push({
-                    loader: "imerge-loader"
-                });
-            }
-
-            if (loader) {
-                loaders.push({
-                    loader: loader + "-loader",
-                    options: Object.assign(
-                        {},
-                        loaderOptions,
-                        {
-                            sourceMap: options.sourceMap
-                        },
-                        options.loaderOptions[loader]
-                    )
-                });
-            }
-
-            if (options.extract) {
-                return ExtractTextPlugin.extract({
-                    use: loaders,
-                    fallback: options.fallback
-                });
-            } else {
-                return [options.fallback].concat(loaders);
-            }
-        }
-
-        return {
-            css: generateLoaders(),
-            postcss: generateLoaders(),
-            less: generateLoaders("less"),
-            sass: generateLoaders("sass", { indentedSyntax: true }),
-            scss: generateLoaders("sass"),
-            stylus: generateLoaders("stylus"),
-            styl: generateLoaders("stylus")
-        };
-    }
-
-    vueLoader({ cssSourceMap, extract, fallback, imerge, loaderOptions }) {
-        let cssLoaders = this.cssLoaders({
-            sourceMap: cssSourceMap,
-            extract: extract,
-            fallback: fallback,
-            imerge: imerge,
-            loaderOptions: loaderOptions
-        });
-
-        let postcss = loaderOptions.postcss;
-
-        if (typeof loaderOptions.postcss.plugins == "function") {
-            postcss = Object.assign({}, loaderOptions.postcss, {
-                useConfigFile: false,
-                plugins: loaderOptions.postcss.plugins()
-            });
-        }
-
-        return {
-            loaders: Object.assign(
-                {},
-                {
-                    js: {
-                        loader: "babel-loader",
-                        options: Object.assign({}, loaderOptions.babel)
-                    }
-                },
-                cssLoaders
-            ),
-            cssSourceMap: cssSourceMap,
-            postcss: postcss,
-            preserveWhitespace: false,
-            transformToRequire: {
-                video: "src",
-                source: "src",
-                img: "src",
-                image: "xlink:href"
-            }
-        };
     }
 };

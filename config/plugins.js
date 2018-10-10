@@ -20,7 +20,3 @@ exports.vendor = {
         }
     }
 };
-
-exports.manifest = {
-    env: ["dev", "test", "prod"]
-};
