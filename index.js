@@ -69,6 +69,24 @@ module.exports = class VueHook {
             config.mergeRule(rules);
         });
 
+        builder.on("merge-plugin", config => {
+            if (builder.options.mode == "vue-prerender") {
+                plugins.PrerenderWebpackPlugin = {
+                    enable: true,
+                    type: "client",
+                    env: ["test", "prod"],
+                    name: PrerenderWebpackPlugin,
+                    args() {
+                        return {
+                            config: builder.serverWebpackConfig,
+                            webpack: config.webpack
+                        };
+                    }
+                };
+            }
+            config.mergePlugin(plugins);
+        });
+
         if (builder.options.mode != "vue-prerender") return;
 
         builder.on("client-config", config => {
@@ -88,7 +106,9 @@ module.exports = class VueHook {
             }
 
             config.set("entry", entry);
+        });
 
+        builder.on("merge-optimization", (config) => {
             config.mergeOptimization({
                 splitChunks: {
                     cacheGroups: {
@@ -109,23 +129,7 @@ module.exports = class VueHook {
                     }
                 }
             });
-        });
-
-        builder.on("merge-plugin", config => {
-            plugins.PrerenderWebpackPlugin = {
-                enable: true,
-                type: "client",
-                env: ["test", "prod"],
-                name: PrerenderWebpackPlugin,
-                args() {
-                    return {
-                        config: builder.serverWebpackConfig,
-                        webpack: config.webpack
-                    };
-                }
-            };
-            config.mergePlugin(plugins);
-        });
+        })
 
         builder.on("server-config", config => {
             config.set(
