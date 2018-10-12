@@ -94,15 +94,15 @@ module.exports = class VueHook {
                 app: path.join(__dirname, "./template/entry-client.js")
             };
 
-            if (config.env == "dev") {
-                entry.app = [
-                    "webpack-hot-middleware/client?name=client&reload=true&timeout=30000".replace(
-                        /\/\//g,
-                        "/"
-                    ),
-                    entry.app
-                ];
-            }
+            // if (config.env == "dev") {
+            //     entry.app = [
+            //         "webpack-hot-middleware/client?name=client&reload=true&timeout=30000".replace(
+            //             /\/\//g,
+            //             "/"
+            //         ),
+            //         entry.app
+            //     ];
+            // }
 
             config.set("entry", entry);
         });
@@ -142,7 +142,8 @@ module.exports = class VueHook {
                     nodeExternals({
                         whitelist: [
                             /es6-promise|\.(?!(?:js|json)$).{1,5}$/i,
-                            /\.css$/
+                            /\.css$/,
+                            /\?vue&type=style/
                         ]
                     })
                 );
