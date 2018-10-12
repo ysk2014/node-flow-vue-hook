@@ -91,8 +91,7 @@ module.exports = class VueHook {
 
         builder.on("client-config", config => {
             let entry = {
-                app: path.join(__dirname, "./template/entry-client.js"),
-                vendor: ["vue"].concat(this.options.vendor).filter(v => v)
+                app: path.join(__dirname, "./template/entry-client.js")
             };
 
             if (config.env == "dev") {
